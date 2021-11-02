@@ -5,8 +5,8 @@ inputs:
     description: 'Who to greet'
     required: true
     default: 'World'
-  admins: whitelist of admins allow to merge the PR
-    description: 'Admins'
+  admins: 
+    description: 'whitelist of admins allow to merge the PR'
     required: true
     default: ()
 outputs:
