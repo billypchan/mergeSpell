@@ -1,10 +1,14 @@
 name: 'Hello World'
 description: 'Greet someone'
 inputs:
-  who-to-greet:  # id of input
+  who-to-greet:
     description: 'Who to greet'
     required: true
     default: 'World'
+  admins: whitelist of admins allow to merge the PR
+    description: 'Admins'
+    required: true
+    default: ()
 outputs:
   random-number:
     description: "Random number"
@@ -17,5 +21,17 @@ runs:
     - id: random-number-generator
       run: echo "::set-output name=random-id::$(echo $RANDOM)"
       shell: bash
-    - run: ${{ github.action_path }}/goodbye.sh
-      shell: bash
+    - name: get release type
+      id: releaseType
+      run: |
+        TYPE=`echo ${{ github.event.comment.body }} | cut -d " " -f 2`
+        echo $TYPE
+        echo "::set-output name=TYPE::$TYPE"
+    - name: guard for magic spell
+      if: ${{ github.event.comment.body != 'release major' && github.event.comment.body != 'release minor' && github.event.comment.body != 'release patch'}}
+      run: exit 1
+    - uses: actions-ecosystem/action-create-comment@v1
+      with:
+        github_token: ${{ secrets.github_token }}
+        body: |
+          Hello, @${{ github.actor }}! Merging PR for command **${{ github.event.comment.body}}** for PR #**${{ github.event.issue.number }}**. Will create a **${{ steps.releaseType.outputs.TYPE }}** release after merged
